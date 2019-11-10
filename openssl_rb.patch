@@ -1,0 +1,37 @@
+--- /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/openssl.rb	2019-11-06 21:39:58.000000000 -0800
++++ /usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula/openssl.rb	2019-11-09 10:51:49.000000000 -0800
+@@ -16,9 +16,6 @@
+     sha256 "bdbc44c56f63f27ab4dc12583b7f46a6485500f2a583dc8c9b848c4063f58927" => :sierra
+   end
+ 
+-  keg_only :provided_by_macos,
+-    "Apple has deprecated use of OpenSSL in favor of its own TLS and crypto libraries"
+-
+   def install
+     # OpenSSL will prefer the PERL environment variable if set over $PATH
+     # which can cause some odd edge cases & isn't intended. Unset for safety,
+@@ -30,19 +27,19 @@
+     args = %W[
+       --prefix=#{prefix}
+       --openssldir=#{openssldir}
++      no-asm
+       no-ssl2
+       no-ssl3
+       no-zlib
+-      shared
++      no-shared
+       enable-cms
+       darwin64-x86_64-cc
+       enable-ec_nistp_64_gcc_128
+     ]
+     system "perl", "./Configure", *args
+-    system "make", "depend"
+-    system "make"
+-    system "make", "test"
+-    system "make", "install", "MANDIR=#{man}", "MANSUFFIX=ssl"
++    system "make", "depend", "-j16"
++    system "make", "-j16"
++    system "make", "install", "MANDIR=#{man}", "MANSUFFIX=ssl", "-j16"
+   end
+ 
+   def openssldir

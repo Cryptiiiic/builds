@@ -1,0 +1,93 @@
+language: c
+os: osx
+osx_image: xcode10.1
+
+git:
+  submodules: false
+  depth: false
+
+before_install:
+- ssh-keyscan github.com >> ~/.ssh/known_hosts
+- git submodule update --init
+- DIR=$(pwd)
+- HOMEBREW_FORMULA_DIR=/usr/local/Homebrew/Library/Taps/homebrew/homebrew-core/Formula
+- cd $HOMEBREW_FORMULA_DIR
+- patch < $DIR/openssl_rb.patch
+- brew reinstall -s openssl
+- brew unlink libpng
+- cd $DIR
+- git clone --branch=libpng16 https://github.com/glennrp/libpng.git
+- cd libpng
+- "./configure --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master https://github.com/xerub/xpwn.git
+- cd xpwn
+- cmake .
+- make -j16
+- cp common/libcommon.a ipsw-patch/libxpwn.a /usr/local/lib/
+- cp -r includes/* /usr/local/include/
+- cd $DIR
+- git clone --branch=master https://github.com/libimobiledevice/libplist.git
+- cd libplist
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --without-cython --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master https://github.com/libimobiledevice/libusbmuxd.git
+- cd libusbmuxd
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --without-cython --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master https://github.com/libimobiledevice/libirecovery.git
+- cd libirecovery
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master https://github.com/libimobiledevice/libimobiledevice.git
+- cd libimobiledevice
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --without-cython --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master https://github.com/nih-at/libzip.git
+- cd libzip/lib
+- patch < $DIR/libzip_lib_cmake.patch
+- cd ..
+- patch < $DIR/libzip_cmake.patch
+- cmake .
+- make -j16 install
+- cd $DIR
+- git clone --branch=master http://github.com/tihmstar/libfragmentzip.git
+- cd libfragmentzip
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master --recursive http://github.com/tihmstar/tsschecker.git
+- cd tsschecker
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --disable-debug"
+- make -j16 install
+- cd $DIR
+
+script: echo -n ""
+
+before_deploy:
+- git config --local user.name $username
+- git config --local user.email $email
+- export TRAVIS_TAG=${TRAVIS_TAG:-$os_version-build-$(git log --format=%h -1)-v$build_version}
+- git tag $TRAVIS_TAG
+
+deploy:
+  provider: releases
+  prerelease: $prerelease
+  skip_cleanup: true
+  api_key:
+    secure: mLiol7PelAh89bqRntfUYnGB7gsuezQSq42TSZQgUf/KhjxKzXlMxxSi1REwos3r0bSjSc9yUlcmK+doZgaXjBQpgtpDbWaI9LObPAsy+T0AP9A7BQiYDZguhTtACqMljwaDtDPSuzlcNIuNDH7F0WdA7cVS2wda7nZhOUq8CIM6w9HsRd2Gc4eLSrEdVXDIafZb0VRt/0BqZrPWJPMHjSFrUJrXClE3CdbyfqA/8aWiPeiRrbRh63vYlbg0pcW5KkNxn6McEbORGFceCGQnFcmCB83ioazAf7bDdQ0bhEDutwI4I1KtM+1BJdGO78MBxlB4DTzewQNMmsjiyNDe831vInOHZA/+JnmamyPvLNJw5DON7oL4DJEGDvwkoAzfLMplQfk/MpZtXS2ac72vReDnWb3U1Nm9332xwFUvx6DhxaiLgOmIbZeHS62U49Ud8dqu657VTDprpsnK28ONSN79b3U5QnBdQAz9Y5Lu6GALieCiDK1Oy0YrthbgSsIzdfMDuq5JrPqA3A2rmqVG9Q0mzKVgfL/VhfEDhkbobY/+07cBimrimyj9+gnj7vH4m6b/clPGC7wNp80+ttCiIpXnV+8AFxe3OpTH/L5wRPfkfYQhQRNyDjTQDEtgtFo9NejbfWpEHhWWIRNihvh1HN0CIKpacPnAlSkdo2aLnNI=
+  file: "/usr/local/bin/tsschecker"
+  on:
+    repo: Cryptiiiic/builds

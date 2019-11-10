@@ -1,0 +1,11 @@
+--- CMakeLists.txt	2019-11-09 12:11:14.000000000 -0800
++++ CMakeLists.txt	2019-11-09 12:10:45.000000000 -0800
+@@ -60,7 +60,7 @@
+   SET(WINDOWS_CRYPTO_FOUND FALSE)
+ ENDIF()
+ 
+-OPTION(BUILD_SHARED_LIBS "Build shared libraries" ON)
++OPTION(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+ 
+ 
+ OPTION(SHARED_LIB_VERSIONNING "Add SO version in .so build" ON)

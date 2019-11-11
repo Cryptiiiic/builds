@@ -5,3 +5,4 @@ Cryptiiiic/builds
 
 - tsschecker
 - img4tool
+- futurerestore

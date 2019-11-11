@@ -1,0 +1,18 @@
+--- futurerestore/external/idevicerestore/src/thread.c	2019-11-10 18:37:51.000000000 -0800
++++ thread.c	2019-11-10 18:37:41.000000000 -0800
+@@ -21,6 +21,7 @@
+ 
+ #include "thread.h"
+ 
++#if 0
+ int thread_new(thread_t *thread, thread_func_t thread_func, void* data)
+ {
+ #ifdef WIN32
+@@ -115,6 +116,7 @@
+ 	pthread_once(once_control, init_routine);
+ #endif
+ }
++#endif
+ 
+ void cond_init(cond_t* cond)
+ {

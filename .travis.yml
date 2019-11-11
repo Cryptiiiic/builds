@@ -14,7 +14,7 @@ before_install:
 - cd $HOMEBREW_FORMULA_DIR
 - patch < $DIR/openssl_rb.patch
 - brew reinstall -s openssl
-- brew unlink libpng
+- brew unlink libpng xz
 - cd $DIR
 - git clone --branch=libpng16 https://github.com/glennrp/libpng.git
 - cd libpng
@@ -61,6 +61,12 @@ before_install:
 - cmake .
 - make -j16 install
 - cd $DIR
+- git clone --branch=master http://github.com/tihmstar/libgeneral.git
+- cd libgeneral
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --disable-debug"
+- make -j16 install
+- cd $DIR
 - git clone --branch=master http://github.com/tihmstar/libfragmentzip.git
 - cd libfragmentzip
 - "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
@@ -73,17 +79,35 @@ before_install:
   --disable-shared --disable-debug"
 - make -j16 install
 - cd $DIR
-- git clone --branch=master http://github.com/tihmstar/libgeneral.git
-- cd libgeneral
-- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
-  --disable-shared --disable-debug"
-- make -j16 install
-- cd $DIR
 - git clone --branch=master http://github.com/tihmstar/img4tool.git
 - cd img4tool
 - "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
   --disable-shared --disable-debug"
 - make -j16 install
+- cd $DIR
+- git clone --branch=master http://github.com/tihmstar/liboffsetfinder64.git
+- cd liboffsetfinder64
+- cp -r /usr/local/include/libgeneral include/liboffsetfinder64/libgeneral
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master --recursive http://github.com/tihmstar/libipatcher.git
+- cd libipatcher
+- cp -r /usr/local/include/liboffsetfinder64 include/liboffsetfinder64
+- cp -r /usr/local/include/libgeneral include/liboffsetfinder64/libgeneral
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-shared --disable-debug"
+- make -j16 install
+- cd $DIR
+- git clone --branch=master --recursive http://github.com/tihmstar/futurerestore.git
+- cd futurerestore/external/idevicerestore/src
+- patch < $DIR/idevicerestore_thread_c.patch
+- cd ../../../
+- "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
+  --disable-debug"
+- find . -type f -name "*.la" -delete
+- make -j16 install LDFLAGS="-lbz2"
 - cd $DIR
 
 script: echo -n ""
@@ -103,5 +127,6 @@ deploy:
   file:
     - "/usr/local/bin/tsschecker"
     - "/usr/local/bin/img4tool"
+    - "/usr/local/bin/futurerestore"
   on:
     repo: Cryptiiiic/builds

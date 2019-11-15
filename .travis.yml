@@ -75,12 +75,14 @@ before_install:
 - cd $DIR
 - git clone --branch=master --recursive http://github.com/tihmstar/tsschecker.git
 - cd tsschecker
+- TSSCHECKER_VERSION=$(git rev-list --count HEAD | tr -d '\n')
 - "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
   --disable-shared --disable-debug"
 - make -j16 install
 - cd $DIR
 - git clone --branch=master http://github.com/tihmstar/img4tool.git
 - cd img4tool
+- IMG4TOOL_VERSION=$(git rev-list --count HEAD | tr -d '\n')
 - "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
   --disable-shared --disable-debug"
 - make -j16 install
@@ -104,6 +106,7 @@ before_install:
 - cd futurerestore/external/idevicerestore/src
 - patch < $DIR/idevicerestore_thread_c.patch
 - cd ../../../
+- FUTURERESTORE_VERSION=$(git rev-list --count HEAD | tr -d '\n')
 - "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
   --disable-debug"
 - find . -type f -name "*.la" -delete
@@ -111,13 +114,28 @@ before_install:
 - cd $DIR
 - git clone --branch=master http://github.com/tihmstar/ra1nsn0w.git
 - cd ra1nsn0w
+- RA1NSN0W_VERSION=$(git rev-list --count HEAD | tr -d '\n')
 - cp -r /usr/local/include/libgeneral /usr/local/include/liboffsetfinder64/libgeneral
 - "./autogen.sh --disable-dependency-tracking --disable-silent-rules --prefix=/usr/local
   --disable-shared --disable-debug"
 - make -j16 install
-- cd $DIR
+- mkdir $DIR/releases
+- cd /usr/local/bin/
+- cp tsschecker img4tool futurerestore ra1nsn0w $DIR/releases/
+- cd $DIR/releases
+- brew install gnu-tar
+- brew link --overwrite xz
+- TSSCHECKER_RELEASE=tsschecker_${os_version}_$TSSCHECKER_VERSION.tar.xz
+- IMG4TOOL_RELEASE=img4tool_${os_version}_$IMG4TOOL_VERSION.tar.xz
+- FUTURERESTORE_RELEASE=futurerestore_${os_version}_$FUTURERESTORE_VERSION.tar.xz
+- RA1NSN0W_RELEASE=ra1nsn0w_${os_version}_$RA1NSN0W_VERSION.tar.xz
+- gtar ckpJvf $TSSCHECKER_RELEASE tsschecker
+- gtar ckpJvf $IMG4TOOL_RELEASE img4tool
+- gtar ckpJvf $FUTURERESTORE_RELEASE futurerestore
+- gtar ckpJvf $RA1NSN0W_RELEASE ra1nsn0w
 
-script: echo -n ""
+script: echo $TSSCHECKER_RELEASE $IMG4TOOL_RELEASE $FUTURERESTORE_RELEASE $RA1NSN0W_RELEASE
+#script: echo -n ""
 
 before_deploy:
 - git config --local user.name $username
@@ -132,9 +150,9 @@ deploy:
   api_key:
     secure: mLiol7PelAh89bqRntfUYnGB7gsuezQSq42TSZQgUf/KhjxKzXlMxxSi1REwos3r0bSjSc9yUlcmK+doZgaXjBQpgtpDbWaI9LObPAsy+T0AP9A7BQiYDZguhTtACqMljwaDtDPSuzlcNIuNDH7F0WdA7cVS2wda7nZhOUq8CIM6w9HsRd2Gc4eLSrEdVXDIafZb0VRt/0BqZrPWJPMHjSFrUJrXClE3CdbyfqA/8aWiPeiRrbRh63vYlbg0pcW5KkNxn6McEbORGFceCGQnFcmCB83ioazAf7bDdQ0bhEDutwI4I1KtM+1BJdGO78MBxlB4DTzewQNMmsjiyNDe831vInOHZA/+JnmamyPvLNJw5DON7oL4DJEGDvwkoAzfLMplQfk/MpZtXS2ac72vReDnWb3U1Nm9332xwFUvx6DhxaiLgOmIbZeHS62U49Ud8dqu657VTDprpsnK28ONSN79b3U5QnBdQAz9Y5Lu6GALieCiDK1Oy0YrthbgSsIzdfMDuq5JrPqA3A2rmqVG9Q0mzKVgfL/VhfEDhkbobY/+07cBimrimyj9+gnj7vH4m6b/clPGC7wNp80+ttCiIpXnV+8AFxe3OpTH/L5wRPfkfYQhQRNyDjTQDEtgtFo9NejbfWpEHhWWIRNihvh1HN0CIKpacPnAlSkdo2aLnNI=
   file:
-    - "/usr/local/bin/tsschecker"
-    - "/usr/local/bin/img4tool"
-    - "/usr/local/bin/futurerestore"
-    - "/usr/local/bin/ra1nsn0w"
+    - $DIR/releases/$TSSCHECKER_RELEASE
+    - $DIR/releases/$IMG4TOOL_RELEASE
+    - $DIR/releases/$FUTURERESTORE_RELEASE
+    - $DIR/releases/$RA1NSN0W_RELEASE
   on:
     repo: Cryptiiiic/builds
